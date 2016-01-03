@@ -8,22 +8,31 @@ from scrapy_craigslist.items import ScrapyCraigslistItem
 from scrapy.http import Request
 from urlparse import urljoin
 from urlparse import urlparse
+import time
 
-DOWNLOAD_DELAY = 0.5    # craig blocks you fast
+DOWNLOAD_DELAY = 2.5    # craig blocks you fast
+
+def extract_domain(url):
+    parsed_uri = urlparse(url)
+    return '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
 
 class CraigslistSpider(CrawlSpider):
     name = 'craigslist'
 
-    def __init__(self, city='sfbay', topic='rid'):
-        self.allowed_domains = ['{}.craigslist.org'.format(city)]
+    def __init__(self, topic='rid'):
         self.topic = topic
-        self.city = city
-        self.start_urls = ['http://{0}.craigslist.org/search/{1}?'.format(city, topic)]
+        with open('craiglists.csv','r') as fin:
+            city_pages = set([line.strip() for line in fin])
+        self.start_urls = [urljoin(x,'/search/{}?'.format(topic)) for x in city_pages]
+        self.allowed_domains = [extract_domain(x) for x in self.start_urls]
         super(CraigslistSpider, self).__init__()
 
     def start_requests(self):
         for url in self.start_urls:
-            yield Request(url, callback=self.parse_items_1)
+            print url
+            yield Request(url, callback=self.parse_search_results)
+            print 'sleep......'
+            time.sleep(5)
 
     def parse_search_results(self, response):
         """
@@ -31,8 +40,7 @@ class CraigslistSpider(CrawlSpider):
         """
         items = []
         hxs = Selector(response)
-        parsed_uri = urlparse(response.url)
-        domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+        domain = extract_domain(response.url)
         contents = hxs.xpath("//div[@class='content']/*")
         for content in contents:
             item = ScrapyCraigslistItem()
