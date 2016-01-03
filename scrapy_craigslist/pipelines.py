@@ -18,6 +18,8 @@ class DuplicatesPipeline(object):
         self.titles_seen = set()
 
     def process_item(self, item, spider):
+        if 'title' not in item:
+            raise DropItem("No title %s" % item)
         if item['title'] in self.titles_seen:
             raise DropItem("Duplicate item found: %s" % item)
         else:

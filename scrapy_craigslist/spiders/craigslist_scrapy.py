@@ -6,6 +6,8 @@ from scrapy.spiders import Rule, CrawlSpider
 from scrapy.selector import Selector
 from scrapy_craigslist.items import ScrapyCraigslistItem
 from scrapy.http import Request
+from urlparse import urljoin
+from urlparse import urlparse
 
 DOWNLOAD_DELAY = 0.5    # craig blocks you fast
 
@@ -55,20 +57,23 @@ class CraigslistSpider(CrawlSpider):
         """
         items = []
         hxs = Selector(response)
-        #import pdb; pdb.set_trace()
-        print response.url
+        parsed_uri = urlparse(response.url)
+        domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
         contents = hxs.xpath("//div[@class='content']/*")
         for content in contents:
             item = ScrapyCraigslistItem()
-            item ["title"] = content.xpath("//p/span/span/a/text()").extract()[0]
-            k = content.xpath("//p/a/@href").extract()[0]
-            item ['ad_url'] = 'http://{0}.craigslist.org{1}'.format(self.city, ''.join(k))
-            # item ["img_url"] = content.select("(//img//@src)").extract() # BAAAD
-            item ["post_date"] = content.xpath("//p/span/span/time/text()").extract()[0]
-            item ["post_date_specific"] = content.xpath("//p/span/span/time/@datetime").extract()[0]
-            item ["price"] = content.xpath("//p/span/span[@class='l2']/span/text()").extract()[0]
-            item ["room_details"] = content.xpath("//p/span/span[@class='l2']/text()").extract()[0].strip().replace('/', '')
-            item ["location"] = content.xpath("//p/span/span[@class='l2']/span[@class='pnr']/small/text()").extract()[0].strip()
+            title = content.xpath(".//*[@class='hdrlnk']/text()").extract()
+            if title:
+                item['title'] = title[0]
+            ad_relative_url = content.xpath(".//*[@class='hdrlnk']/@href").extract()
+            if ad_relative_url:
+                item['ad_url'] = urljoin(domain, ad_relative_url[0])
+            post_date = content.xpath(".//*[@class='pl']/time/@datetime").extract()
+            if post_date:
+                item['post_date'] = post_date[0]
+            location = content.xpath(".//*[@class='l2']/*[@class='pnr']/small/text()").extract()
+            if location:
+                item['location'] = location[0].strip().strip('(').strip(')')
             # print ('**parse-items_1:', item["title"])
             items.append(item)
         return items
