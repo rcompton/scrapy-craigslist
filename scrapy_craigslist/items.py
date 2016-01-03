@@ -7,13 +7,8 @@
 
 import scrapy
 
-
 class ScrapyCraigslistItem(scrapy.Item):
     title = scrapy.Field()
     post_date = scrapy.Field()
-    post_date_specific = scrapy.Field()
-    price = scrapy.Field()
     location = scrapy.Field()
     ad_url = scrapy.Field()
-    img_url = scrapy.Field()
-    room_details = scrapy.Field()
