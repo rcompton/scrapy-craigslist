@@ -9,8 +9,7 @@ from scrapy.http import Request
 from urlparse import urljoin
 from urlparse import urlparse
 import time
-
-DOWNLOAD_DELAY = 2.5    # craig blocks you fast
+import random
 
 def extract_domain(url):
     parsed_uri = urlparse(url)
@@ -31,8 +30,9 @@ class CraigslistSpider(CrawlSpider):
         for url in self.start_urls:
             print url
             yield Request(url, callback=self.parse_search_results)
-            print 'sleep......'
-            time.sleep(5)
+            ts = random.randint(5, 30)
+            print 'sleep for {}...'.format(ts)
+            time.sleep(ts)
 
     def parse_search_results(self, response):
         """

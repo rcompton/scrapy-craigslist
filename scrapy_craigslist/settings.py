@@ -10,6 +10,8 @@
 
 BOT_NAME = 'scrapy_craigslist'
 
+DOWNLOAD_DELAY = 2.5    # craig blocks you fast
+
 SPIDER_MODULES = ['scrapy_craigslist.spiders']
 NEWSPIDER_MODULE = 'scrapy_craigslist.spiders'
 
