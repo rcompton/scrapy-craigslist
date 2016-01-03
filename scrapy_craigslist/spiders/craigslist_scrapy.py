@@ -5,6 +5,7 @@ from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
 from scrapy.selector import Selector
 from scrapy_craigslist.items import ScrapyCraigslistItem
+from scrapy.http import Request
 
 DOWNLOAD_DELAY = 0.5    # craig blocks you fast
 
