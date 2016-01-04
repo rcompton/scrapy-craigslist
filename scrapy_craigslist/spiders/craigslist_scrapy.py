@@ -22,6 +22,8 @@ class CraigslistSpider(CrawlSpider):
         self.topic = topic
         with open('craiglists.csv','r') as fin:
             city_pages = set([line.strip() for line in fin])
+        city_pages = list(city_pages)
+        random.shuffle(city_pages)
         self.start_urls = [urljoin(x,'/search/{}?'.format(topic)) for x in city_pages]
         self.allowed_domains = [extract_domain(x) for x in self.start_urls]
         super(CraigslistSpider, self).__init__()

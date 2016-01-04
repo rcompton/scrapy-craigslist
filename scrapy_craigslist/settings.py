@@ -9,6 +9,7 @@
 #
 
 BOT_NAME = 'scrapy_craigslist'
+FEED_FORMAT = 'jsonlines'
 
 DOWNLOAD_DELAY = 2.5    # craig blocks you fast
 
