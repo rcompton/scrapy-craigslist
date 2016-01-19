@@ -44,20 +44,27 @@ class CraigslistSpider(CrawlSpider):
         hxs = Selector(response)
         domain = extract_domain(response.url)
         contents = hxs.xpath("//div[@class='content']/*")
+        contents2 = hxs.xpath("//div[@class='content']/*/*")
+        contents = contents + contents2
+        #from scrapy.shell import inspect_response
+        #inspect_response(response, self)
         for content in contents:
-            item = ScrapyCraigslistItem()
-            title = content.xpath(".//*[@class='hdrlnk']/text()").extract()
-            if title:
-                item['title'] = title[0]
-            ad_relative_url = content.xpath(".//*[@class='hdrlnk']/@href").extract()
-            if ad_relative_url:
-                item['ad_url'] = urljoin(domain, ad_relative_url[0])
-            post_date = content.xpath(".//*[@class='pl']/time/@datetime").extract()
-            if post_date:
-                item['post_date'] = post_date[0]
-            location = content.xpath(".//*[@class='l2']/*[@class='pnr']/small/text()").extract()
-            if location:
-                item['location'] = location[0].strip().strip('(').strip(')')
-            # print ('**parse-items_1:', item["title"])
-            items.append(item)
+            try:
+                item = ScrapyCraigslistItem()
+                title = content.xpath(".//*[@class='hdrlnk']/text()").extract()
+                if title:
+                    item['title'] = title[0]
+                ad_relative_url = content.xpath(".//*[@class='hdrlnk']/@href").extract()
+                if ad_relative_url:
+                    item['ad_url'] = urljoin(domain, ad_relative_url[0])
+                post_date = content.xpath(".//*[@class='pl']/time/@datetime").extract()
+                if post_date:
+                    item['post_date'] = post_date[0]
+                location = content.xpath(".//*[@class='l2']/*[@class='pnr']/small/text()").extract()
+                if location:
+                    item['location'] = location[0].strip().strip('(').strip(')')
+                # print ('**parse-items_1:', item["title"])
+                items.append(item)
+            except:
+                print "problem, eh"
         return items
